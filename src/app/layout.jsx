@@ -14,16 +14,15 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Dynamic-QR",
-  description: "Dynamic-QR Genations",
+  description: "Dynamic-QR Generations",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl" className="overflow-x-hidden">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-neutral-950 text-white overflow-x-hidden w-full m-0 p-0 antialiased font-sans`}
       >
-
         {children}
         <Footer />
       </body>
