@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { QrCode, RefreshCw, Download, Upload, Link2, CheckCircle2, Loader2 } from "lucide-react";
+import { QrCode, RefreshCw, Download, Upload, Link2, CheckCircle2, Loader2, ExternalLink } from "lucide-react";
 import QRCode from "qrcode";
 import jsQR from "jsqr";
 import toast, { Toaster } from "react-hot-toast";
@@ -14,6 +14,8 @@ export default function Home() {
 
   // تحديث الـ QR القديم
   const [extractedId, setExtractedId] = useState("");
+  const [currentUrl, setCurrentUrl] = useState(""); // 👈 إضافة state للرابط الحالي
+  const [fetchingCurrentUrl, setFetchingCurrentUrl] = useState(false); // 👈 لودنج أثناء جلب الرابط
   const [newUrl, setNewUrl] = useState("");
   const [updateLoading, setUpdateLoading] = useState(false);
 
@@ -28,18 +30,16 @@ export default function Home() {
     const qrId = "qr_" + Date.now();
 
     try {
-      // حفظ في الشيت (العمود A والعمود B)
       await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ action: "update", id: qrId, url: targetUrl }),
       });
 
-      // الرابط الدايناميك اللي هيتحفر جوه الـ QR
-      const appDomain = window.location.origin;
+      // تثبيت دومين Vercel الحقيقي دايماً
+      const appDomain = "https://youssef-portfolio-1.vercel.app";
       const redirectApiUrl = `${appDomain}/api/qr?id=${qrId}`;
 
-      // توليد صورة الـ QR
       const qrDataUrl = await QRCode.toDataURL(redirectApiUrl, { width: 300, margin: 2 });
       setGeneratedQr({ id: qrId, image: qrDataUrl });
 
@@ -52,7 +52,7 @@ export default function Home() {
     }
   };
 
-  // 2. قراءة صورة QR قديم لتحديثه
+  // 2. قراءة صورة QR وجلب الرابط الحالي من جوجل شيت
   const handleScanImage = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -60,7 +60,7 @@ export default function Home() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         canvas.width = img.width;
@@ -76,7 +76,25 @@ export default function Home() {
             const id = urlObj.searchParams.get("id");
             if (id) {
               setExtractedId(id);
-              toast.success(`تم قراءة المعرّف: ${id}`);
+              setCurrentUrl("");
+              setFetchingCurrentUrl(true);
+
+              // 🚀 جلب الرابط الحالي المربوط بالـ ID من جوجل شيت
+              try {
+                const res = await fetch(`${GOOGLE_SCRIPT_URL}?id=${id}`);
+                const data = await res.json();
+                if (data && data.url) {
+                  setCurrentUrl(data.url);
+                  toast.success("تم قراءة الـ QR وجلب الرابط الحالي!");
+                } else {
+                  setCurrentUrl("غير مسجل في الشيت");
+                }
+              } catch (err) {
+                toast.error("فشل جلب الرابط الحالي من الشيت");
+              } finally {
+                setFetchingCurrentUrl(false);
+              }
+
             } else {
               toast.error("هذا الـ QR لا ينتمي لنظامنا Dynamic QR");
             }
@@ -106,7 +124,7 @@ export default function Home() {
       });
 
       toast.success("تم تحديث رابط الـ QR في الشيت بنجاح!");
-      setExtractedId("");
+      setCurrentUrl(newUrl); // تحديث الرابط الحالي مع العرض
       setNewUrl("");
     } catch (err) {
       toast.error("فشل التحديث في الشيت");
@@ -182,7 +200,7 @@ export default function Home() {
             </div>
 
             <div className="space-y-4">
-              <label className="block text-xs text-neutral-400">ارفع صورة الـ QR المطبوع لقراءة الـ ID:</label>
+              <label className="block text-xs text-neutral-400">ارفع صورة الـ QR المطبوع لقرائته:</label>
               <label className="border-2 border-dashed border-neutral-800 hover:border-cyan-500/50 bg-neutral-950 rounded-lg p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition">
                 <Upload size={24} className="text-neutral-500" />
                 <span className="text-xs text-neutral-400">اختر صورة من جهازك</span>
@@ -191,26 +209,50 @@ export default function Home() {
 
               {extractedId && (
                 <form onSubmit={handleUpdateQR} className="space-y-4 pt-4 border-t border-neutral-800">
-                  <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-950/50 p-3 rounded-lg border border-emerald-800/50">
-                    <CheckCircle2 size={16} />
-                    <span>المعرف المقروء: <b>{extractedId}</b></span>
+                  {/* صندوق تفاصيل الـ QR المقروء والرابط الحالي */}
+                  <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-4 space-y-2 text-xs">
+                    <div className="flex items-center justify-between text-emerald-400">
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <CheckCircle2 size={15} /> المعرف (ID):
+                      </span>
+                      <span className="font-mono text-white bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">{extractedId}</span>
+                    </div>
+
+                    <div className="flex flex-col gap-1 border-t border-neutral-900 pt-2">
+                      <span className="text-neutral-400">الرابط الحالي المسجل:</span>
+                      {fetchingCurrentUrl ? (
+                        <span className="flex items-center gap-2 text-indigo-400 py-1">
+                          <Loader2 size={14} className="animate-spin" /> جاري جلب الرابط الحالي من الشيت...
+                        </span>
+                      ) : (
+                        <a
+                          href={currentUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-cyan-400 hover:text-cyan-300 font-mono truncate dir-ltr text-left flex items-center gap-1.5 hover:underline bg-cyan-950/30 p-2 rounded border border-cyan-900/40"
+                        >
+                          <ExternalLink size={13} className="shrink-0" />
+                          <span className="truncate">{currentUrl || "لا يوجد رابط"}</span>
+                        </a>
+                      )}
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs text-neutral-400 mb-2">الرابط الجديد:</label>
+                    <label className="block text-xs text-neutral-400 mb-2">الرابط الجديد المراد تحويل الـ QR إليه:</label>
                     <input
                       type="url"
                       required
                       value={newUrl}
                       onChange={(e) => setNewUrl(e.target.value)}
-                      placeholder="https://"
+                      placeholder="https://wasla-w.vercel.app/"
                       className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 text-sm focus:border-cyan-500 outline-none dir-ltr"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    disabled={updateLoading}
+                    disabled={updateLoading || fetchingCurrentUrl}
                     className="w-full bg-cyan-600 hover:bg-cyan-700 disabled:bg-neutral-800 text-white font-medium p-3 rounded-lg flex items-center justify-center gap-2 text-sm transition"
                   >
                     {updateLoading ? <Loader2 className="animate-spin" size={18} /> : "حفظ الرابط الجديد في الشيت"}
