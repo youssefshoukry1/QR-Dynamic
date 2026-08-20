@@ -36,7 +36,7 @@ export default function Home() {
         body: JSON.stringify({ action: "update", id: qrId, url: targetUrl }),
       });
 
-      const appDomain = "https://youssef-portfolio-1.vercel.app";
+      const appDomain = window.location.origin;
       const redirectApiUrl = `${appDomain}/api/qr?id=${qrId}`;
 
       const qrDataUrl = await QRCode.toDataURL(redirectApiUrl, { width: 300, margin: 2 });

@@ -19,9 +19,9 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ar" dir="rtl" className="overflow-x-hidden">
+    <html lang="ar" dir="rtl">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-neutral-950 text-white overflow-x-hidden w-full m-0 p-0 antialiased font-sans`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-neutral-950 text-white w-full m-0 p-0 antialiased font-sans`}
       >
         {children}
         <Footer />
