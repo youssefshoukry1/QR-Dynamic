@@ -17,7 +17,7 @@ export default function Home() {
   const [newUrl, setNewUrl] = useState("");
   const [updateLoading, setUpdateLoading] = useState(false);
 
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyz3NFZ69pX1LcxxUV92z0yVeEp4LlC-v2DpamHIrney5N2kxxveH8pZTGrxGmGDLiguQ/exec";
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEy2mYOYAjm0NlO0hxpRN4p3kPx5tCQMncnjcsbBi2sL_T0zNnWIPm6bJIakYPYfN-/exec";
 
   // 1. إنشاء QR جديد
   const handleCreateQR = async (e) => {
@@ -203,7 +203,7 @@ export default function Home() {
                       required
                       value={newUrl}
                       onChange={(e) => setNewUrl(e.target.value)}
-                      placeholder="https://wasla-w.vercel.app/"
+                      placeholder="https://"
                       className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 text-sm focus:border-cyan-500 outline-none dir-ltr"
                     />
                   </div>

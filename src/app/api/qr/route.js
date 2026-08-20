@@ -9,7 +9,7 @@ export async function GET(request) {
     }
 
     // رابط جوجل سكريبت بتاعك
-    const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/AKfycbyz3NFZ69pX1LcxxUV92z0yVeEp4LlC-v2DpamHIrney5N2kxxveH8pZTGrxGmGDLiguQ/exec?id=${id}`;
+    const GOOGLE_SCRIPT_URL = `https://script.google.com/macros/s/AKfycbzEy2mYOYAjm0NlO0hxpRN4p3kPx5tCQMncnjcsbBi2sL_T0zNnWIPm6bJIakYPYfN-/exec?id=${id}`;
 
     try {
         // جلب البيانات من جوجل شيت
