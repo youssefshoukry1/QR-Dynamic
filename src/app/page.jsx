@@ -14,8 +14,8 @@ export default function Home() {
 
   // تحديث الـ QR القديم
   const [extractedId, setExtractedId] = useState("");
-  const [currentUrl, setCurrentUrl] = useState(""); // 👈 إضافة state للرابط الحالي
-  const [fetchingCurrentUrl, setFetchingCurrentUrl] = useState(false); // 👈 لودنج أثناء جلب الرابط
+  const [currentUrl, setCurrentUrl] = useState("");
+  const [fetchingCurrentUrl, setFetchingCurrentUrl] = useState(false);
   const [newUrl, setNewUrl] = useState("");
   const [updateLoading, setUpdateLoading] = useState(false);
 
@@ -163,7 +163,8 @@ export default function Home() {
                     value={targetUrl}
                     onChange={(e) => setTargetUrl(e.target.value)}
                     placeholder="https://"
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 pr-10 text-sm focus:border-indigo-500 outline-none dir-ltr"
+                    /* 👇 التعديل هنا: استخدام text-base بدل text-sm لمنع الزوم */
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 pr-10 text-base focus:border-indigo-500 outline-none dir-ltr"
                   />
                 </div>
               </div>
@@ -208,13 +209,12 @@ export default function Home() {
 
               {extractedId && (
                 <form onSubmit={handleUpdateQR} className="space-y-4 pt-4 border-t border-neutral-800">
-                  {/* صندوق تفاصيل الـ QR المقروء والرابط الحالي */}
                   <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-4 space-y-2 text-xs w-full overflow-hidden">
                     <div className="flex items-center justify-between text-emerald-400">
                       <span className="flex items-center gap-1.5 font-medium min-w-max">
                         <CheckCircle2 size={15} /> المعرف (ID):
                       </span>
-                      <span className="font-mono text-white bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800 truncate max-w-[140px] sm:max-w-none">
+                      <span className="font-mono text-white bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800 truncate max-w-[140px] sm:max-w-none block">
                         {extractedId}
                       </span>
                     </div>
@@ -233,7 +233,7 @@ export default function Home() {
                           className="text-cyan-400 hover:text-cyan-300 font-mono text-left flex items-center gap-1.5 hover:underline bg-cyan-950/30 p-2 rounded border border-cyan-900/40 w-full overflow-hidden"
                         >
                           <ExternalLink size={13} className="shrink-0" />
-                          <span className="truncate min-w-0 w-full">{currentUrl || "لا يوجد رابط"}</span>
+                          <span className="truncate min-w-0 w-full block">{currentUrl || "لا يوجد رابط"}</span>
                         </a>
                       )}
                     </div>
@@ -246,8 +246,9 @@ export default function Home() {
                       required
                       value={newUrl}
                       onChange={(e) => setNewUrl(e.target.value)}
-                      placeholder="https://wasla-w.vercel.app/"
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 text-sm focus:border-cyan-500 outline-none dir-ltr"
+                      placeholder="https://"
+                      /* 👇 التعديل هنا: استخدام text-base بدل text-sm لمنع الزوم */
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 text-base focus:border-cyan-500 outline-none dir-ltr"
                     />
                   </div>
 
