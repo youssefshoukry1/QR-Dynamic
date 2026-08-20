@@ -162,7 +162,7 @@ export default function Home() {
                     required
                     value={targetUrl}
                     onChange={(e) => setTargetUrl(e.target.value)}
-                    placeholder="https://youssef-portfolio-1.vercel.app"
+                    placeholder="https://"
                     className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 pr-10 text-sm focus:border-indigo-500 outline-none dir-ltr"
                   />
                 </div>
