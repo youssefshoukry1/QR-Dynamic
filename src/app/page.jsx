@@ -134,13 +134,13 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white p-6 md:p-12 dir-rtl font-sans sm:py-24 py-12">
+    <div className="min-h-screen w-full overflow-x-hidden bg-neutral-950 text-white p-6 md:p-12 dir-rtl font-sans sm:py-24 py-12">
       <Toaster position="top-center" />
 
       <div className="max-w-4xl mx-auto space-y-10">
         <header className="text-center space-y-3">
           <h1 className="text-2xl font-extrabold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-           Dynamic QR Code
+            Dynamic QR Code
           </h1>
         </header>
 
@@ -209,15 +209,17 @@ export default function Home() {
               {extractedId && (
                 <form onSubmit={handleUpdateQR} className="space-y-4 pt-4 border-t border-neutral-800">
                   {/* صندوق تفاصيل الـ QR المقروء والرابط الحالي */}
-                  <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-4 space-y-2 text-xs">
+                  <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-4 space-y-2 text-xs w-full overflow-hidden">
                     <div className="flex items-center justify-between text-emerald-400">
-                      <span className="flex items-center gap-1.5 font-medium">
+                      <span className="flex items-center gap-1.5 font-medium min-w-max">
                         <CheckCircle2 size={15} /> المعرف (ID):
                       </span>
-                      <span className="font-mono text-white bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">{extractedId}</span>
+                      <span className="font-mono text-white bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800 truncate max-w-[140px] sm:max-w-none">
+                        {extractedId}
+                      </span>
                     </div>
 
-                    <div className="flex flex-col gap-1 border-t border-neutral-900 pt-2">
+                    <div className="flex flex-col gap-1 border-t border-neutral-900 pt-2 w-full">
                       <span className="text-neutral-400">الرابط الحالي المسجل:</span>
                       {fetchingCurrentUrl ? (
                         <span className="flex items-center gap-2 text-indigo-400 py-1">
@@ -228,10 +230,10 @@ export default function Home() {
                           href={currentUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-cyan-400 hover:text-cyan-300 font-mono truncate dir-ltr text-left flex items-center gap-1.5 hover:underline bg-cyan-950/30 p-2 rounded border border-cyan-900/40"
+                          className="text-cyan-400 hover:text-cyan-300 font-mono text-left flex items-center gap-1.5 hover:underline bg-cyan-950/30 p-2 rounded border border-cyan-900/40 w-full overflow-hidden"
                         >
                           <ExternalLink size={13} className="shrink-0" />
-                          <span className="truncate">{currentUrl || "لا يوجد رابط"}</span>
+                          <span className="truncate min-w-0 w-full">{currentUrl || "لا يوجد رابط"}</span>
                         </a>
                       )}
                     </div>
