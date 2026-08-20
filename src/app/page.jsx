@@ -134,15 +134,14 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white p-6 md:p-12 dir-rtl font-sans">
+    <div className="min-h-screen bg-neutral-950 text-white p-6 md:p-12 dir-rtl font-sans sm:py-24 py-12">
       <Toaster position="top-center" />
 
       <div className="max-w-4xl mx-auto space-y-10">
         <header className="text-center space-y-3">
-          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-            منصة إدارة الـ Dynamic QR Code
+          <h1 className="text-2xl font-extrabold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+           Dynamic QR Code
           </h1>
-          <p className="text-neutral-400 text-sm">أنشئ واستبدل الروابط المربوطة بالـ QR المطبوع في أي وقت.</p>
         </header>
 
         <div className="grid md:grid-cols-2 gap-8">
