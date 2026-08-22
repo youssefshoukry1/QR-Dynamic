@@ -9,7 +9,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 export default function Home() {
   const [targetUrl, setTargetUrl] = useState("");
-  const [isLocked, setIsLocked] = useState(false);
+  const [isStatic, setIsStatic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [generatedQr, setGeneratedQr] = useState(null);
 
@@ -23,32 +23,42 @@ export default function Home() {
 
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEy2mYOYAjm0NlO0hxpRN4p3kPx5tCQMncnjcsbBi2sL_T0zNnWIPm6bJIakYPYfN-/exec";
 
-  // 1. إنشاء QR جديد
+  // 1. إنشاء QR جديد (ديناميكي افتراضياً أو ثابت حسب الاختيار)
   const handleCreateQR = async (e) => {
     e.preventDefault();
     if (!targetUrl) return toast.error("أدخل الرابط أولاً");
 
     setLoading(true);
-    const qrId = "qr_" + Date.now();
 
     try {
-      await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "update", id: qrId, url: targetUrl, isLocked }),
-      });
+      if (isStatic) {
+        // حالة الـ QR الثابت: طباعة الرابط المباشر بدون السيرفر أو جوجل شيت نهائياً
+        const qrDataUrl = await QRCode.toDataURL(targetUrl, { width: 300, margin: 2 });
+        setGeneratedQr({ id: "static_" + Date.now(), image: qrDataUrl });
+        toast.success("تم إنشاء QR ثابت يوجه للرابط مباشرة!");
+      } else {
+        // حالة الـ QR الديناميكي (الافتراضي): حفظ المعرف في الشيت وتوليد رابط الـ API
+        const qrId = "qr_" + Date.now();
 
-      const appDomain = "https://qr-dynamic-roan.vercel.app";
-      const redirectApiUrl = `${appDomain}/api/qr?id=${qrId}`;
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "update", id: qrId, url: targetUrl, isLocked: false }),
+        });
 
-      const qrDataUrl = await QRCode.toDataURL(redirectApiUrl, { width: 300, margin: 2 });
-      setGeneratedQr({ id: qrId, image: qrDataUrl });
+        const appDomain = "https://qr-dynamic-roan.vercel.app";
+        const redirectApiUrl = `${appDomain}/api/qr?id=${qrId}`;
 
-      toast.success("تم إنشاء الـ QR وحفظه في الشيت بنجاح!");
+        const qrDataUrl = await QRCode.toDataURL(redirectApiUrl, { width: 300, margin: 2 });
+        setGeneratedQr({ id: qrId, image: qrDataUrl });
+
+        toast.success("تم إنشاء الـ QR الديناميكي وحفظه في الشيت بنجاح!");
+      }
+
       setTargetUrl("");
-      setIsLocked(false);
+      setIsStatic(false);
     } catch (err) {
-      toast.error("حدث خطأ أثناء الاتصال بالشيت");
+      toast.error("حدث خطأ أثناء عملية الإنشاء");
     } finally {
       setLoading(false);
     }
@@ -98,13 +108,13 @@ export default function Home() {
               }
 
             } else {
-              toast.error("هذا الـ QR لا ينتمي لنظامنا Dynamic QR");
+              toast.error("هذا الـ QR لا ينتمي لنظامنا Dynamic QR (ربما هو QR ثابت)");
             }
           } catch {
             toast.error("الـ QR لا يحتوي على رابط صحيح");
           }
         } else {
-          toast.error("تعذر قراءة الـ QR، ارفع صورة أربق وأوضح");
+          toast.error("تعذر قراءة الـ QR، ارفع صورة أروق وأوضح");
         }
       };
       img.src = event.target.result;
@@ -170,20 +180,20 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* خيار قفل الرابط (301) */}
+              {/* خيار إنشاء QR ثابت بدون سيرفر */}
               <div
                 className="flex items-center gap-2.5 bg-neutral-950 border border-neutral-800 p-3 rounded-lg cursor-pointer select-none transition hover:border-neutral-700"
-                onClick={() => setIsLocked(!isLocked)}
+                onClick={() => setIsStatic(!isStatic)}
               >
                 <input
                   type="checkbox"
-                  checked={isLocked}
-                  onChange={(e) => setIsLocked(e.target.checked)}
+                  checked={isStatic}
+                  onChange={(e) => setIsStatic(e.target.checked)}
                   className="w-4 h-4 accent-indigo-500 rounded cursor-pointer"
                 />
                 <span className="text-xs text-neutral-300 flex items-center gap-1.5 font-medium">
-                  {isLocked ? <Lock size={15} className="text-amber-400 shrink-0" /> : <LockOpen size={15} className="text-neutral-500 shrink-0" />}
-                  قفل الرابط (توجيه دائم 301 أسرع)
+                  {isStatic ? <Lock size={15} className="text-amber-400 shrink-0" /> : <LockOpen size={15} className="text-neutral-500 shrink-0" />}
+                  إنشاء QR ثابت (طباعة اللينك مباشرة وبدون سيرفر)
                 </span>
               </div>
 
@@ -192,7 +202,7 @@ export default function Home() {
                 disabled={loading}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-neutral-800 text-white font-medium p-3 rounded-lg flex items-center justify-center gap-2 text-sm transition"
               >
-                {loading ? <Loader2 className="animate-spin" size={18} /> : "إنشاء وحفظ في الشيت"}
+                {loading ? <Loader2 className="animate-spin" size={18} /> : isStatic ? "إنشاء QR ثابت" : "إنشاء وحفظ في الشيت"}
               </button>
             </form>
 
