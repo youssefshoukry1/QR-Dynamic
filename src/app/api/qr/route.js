@@ -17,8 +17,9 @@ export async function GET(request) {
         const data = await res.json();
 
         if (data && data.url) {
-            // 🚀 تحويل فوري من السيرفر برقم 302 (بيكسر الـ WebView وبيفتح المتصفح دايركت)
-            return NextResponse.redirect(data.url, 302);
+            // 🚀 توجيه 301 دائم وسريع لو الرابط مقفول (isLocked)، أو 302 لو مرن
+            const redirectStatus = data.isLocked ? 301 : 302;
+            return NextResponse.redirect(data.url, redirectStatus);
         }
 
         return NextResponse.json({ error: "الرابط غير مسجل" }, { status: 404 });

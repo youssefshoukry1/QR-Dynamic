@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { QrCode, RefreshCw, Download, Upload, Link2, CheckCircle2, Loader2, ExternalLink } from "lucide-react";
+import { QrCode, RefreshCw, Download, Upload, Link2, CheckCircle2, Loader2, ExternalLink, Lock, LockOpen } from "lucide-react";
 import QRCode from "qrcode";
 import jsQR from "jsqr";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function Home() {
   const [targetUrl, setTargetUrl] = useState("");
+  const [isLocked, setIsLocked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [generatedQr, setGeneratedQr] = useState(null);
 
@@ -17,6 +18,7 @@ export default function Home() {
   const [currentUrl, setCurrentUrl] = useState("");
   const [fetchingCurrentUrl, setFetchingCurrentUrl] = useState(false);
   const [newUrl, setNewUrl] = useState("");
+  const [updateIsLocked, setUpdateIsLocked] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
 
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEy2mYOYAjm0NlO0hxpRN4p3kPx5tCQMncnjcsbBi2sL_T0zNnWIPm6bJIakYPYfN-/exec";
@@ -33,7 +35,7 @@ export default function Home() {
       await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "update", id: qrId, url: targetUrl }),
+        body: JSON.stringify({ action: "update", id: qrId, url: targetUrl, isLocked }),
       });
 
       const appDomain = "https://qr-dynamic-roan.vercel.app";
@@ -44,6 +46,7 @@ export default function Home() {
 
       toast.success("تم إنشاء الـ QR وحفظه في الشيت بنجاح!");
       setTargetUrl("");
+      setIsLocked(false);
     } catch (err) {
       toast.error("حدث خطأ أثناء الاتصال بالشيت");
     } finally {
@@ -83,6 +86,7 @@ export default function Home() {
                 const data = await res.json();
                 if (data && data.url) {
                   setCurrentUrl(data.url);
+                  setUpdateIsLocked(!!data.isLocked);
                   toast.success("تم قراءة الـ QR وجلب الرابط الحالي!");
                 } else {
                   setCurrentUrl("غير مسجل في الشيت");
@@ -118,7 +122,7 @@ export default function Home() {
       await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "update", id: extractedId, url: newUrl }),
+        body: JSON.stringify({ action: "update", id: extractedId, url: newUrl, isLocked: updateIsLocked }),
       });
 
       toast.success("تم تحديث رابط الـ QR في الشيت بنجاح!");
@@ -164,6 +168,23 @@ export default function Home() {
                     className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 pr-10 text-base focus:border-indigo-500 outline-none dir-ltr"
                   />
                 </div>
+              </div>
+
+              {/* خيار قفل الرابط (301) */}
+              <div
+                className="flex items-center gap-2.5 bg-neutral-950 border border-neutral-800 p-3 rounded-lg cursor-pointer select-none transition hover:border-neutral-700"
+                onClick={() => setIsLocked(!isLocked)}
+              >
+                <input
+                  type="checkbox"
+                  checked={isLocked}
+                  onChange={(e) => setIsLocked(e.target.checked)}
+                  className="w-4 h-4 accent-indigo-500 rounded cursor-pointer"
+                />
+                <span className="text-xs text-neutral-300 flex items-center gap-1.5 font-medium">
+                  {isLocked ? <Lock size={15} className="text-amber-400 shrink-0" /> : <LockOpen size={15} className="text-neutral-500 shrink-0" />}
+                  قفل الرابط (توجيه دائم 301 أسرع)
+                </span>
               </div>
 
               <button
@@ -247,6 +268,23 @@ export default function Home() {
                       placeholder="https://"
                       className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-3 text-base focus:border-cyan-500 outline-none dir-ltr"
                     />
+                  </div>
+
+                  {/* خيار قفل الرابط (301) عند التحديث */}
+                  <div
+                    className="flex items-center gap-2.5 bg-neutral-950 border border-neutral-800 p-3 rounded-lg cursor-pointer select-none transition hover:border-neutral-700"
+                    onClick={() => setUpdateIsLocked(!updateIsLocked)}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={updateIsLocked}
+                      onChange={(e) => setUpdateIsLocked(e.target.checked)}
+                      className="w-4 h-4 accent-cyan-500 rounded cursor-pointer"
+                    />
+                    <span className="text-xs text-neutral-300 flex items-center gap-1.5 font-medium">
+                      {updateIsLocked ? <Lock size={15} className="text-amber-400 shrink-0" /> : <LockOpen size={15} className="text-neutral-500 shrink-0" />}
+                      قفل الرابط (توجيه دائم 301 أسرع)
+                    </span>
                   </div>
 
                   <button
